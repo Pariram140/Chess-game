@@ -1,0 +1,37 @@
+/* components/Board.css */
+.board {
+    display: flex;
+    flex-direction: column; /* Display rows vertically */
+    border: 2px solid #333;
+    width: fit-content; /* Adjust width */
+    margin: 0 auto; /* Center the board */
+  }
+  
+  .board-row {
+    display: flex;
+  }
+  
+  .square {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #8B4513; /* Use a brown color for the border */
+    box-sizing: border-box; /* Include border in width/height calculation */
+    cursor: pointer; /* Add cursor pointer */
+
+  }
+  
+  .square.white {
+    background-color: #f0d9b5;
+  }
+  
+  .square.Black {
+    background-color: #b58863;
+  }
+    
+  .square.black.selected,
+  .square.white.selected {
+    background-color: #ffc107; /* Change to any color you prefer */
+  }
