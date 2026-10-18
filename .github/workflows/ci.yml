@@ -39,13 +39,13 @@ jobs:
       - name: Build production bundle
         run: npm run build
 
-      - name: Install Playwright
+      - name: Install Playwright in an isolated directory
         run: |
-          npm install --no-save --package-lock=false @playwright/test@1.58.2
-          npx playwright install --with-deps chromium
+          npm install --prefix .playwright --no-save --package-lock=false @playwright/test@1.58.2
+          ./.playwright/node_modules/.bin/playwright install --with-deps chromium
 
       - name: Run Playwright functional tests
-        run: npx playwright test
+        run: NODE_PATH="$GITHUB_WORKSPACE/.playwright/node_modules" ./.playwright/node_modules/.bin/playwright test
 
       - name: Upload Playwright failure evidence
         if: always()
