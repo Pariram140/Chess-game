@@ -57,6 +57,6 @@ describe('Board lifecycle UI', () => {
     fireEvent.click(screen.getByRole('button', { name: 'g7 empty square' }));
 
     expect(screen.getByRole('status')).toHaveTextContent(/checkmate/i);
-    expect(screen.getByRole('button', { name: 'a2 white pawn' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'g7 white queen' })).toBeDisabled();
   });
 });
