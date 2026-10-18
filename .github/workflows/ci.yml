@@ -4,14 +4,18 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main]
+    branches:
+      - main
+      - 'chore/**'
+      - 'feature/**'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
   group: react-ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   test-and-build:
