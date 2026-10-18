@@ -63,10 +63,10 @@ describe('game controller', () => {
     expect(invalid.reason).toBe('INVALID_PROMOTION');
     expect(controller.getState().phase).toBe(GAME_PHASES.PROMOTION_PENDING);
 
-    const promoted = controller.choosePromotion('n');
+    const promoted = controller.choosePromotion('q');
     expect(promoted.accepted).toBe(true);
     expect(promoted.state.phase).toBe(GAME_PHASES.CPU_THINKING);
-    expect(promoted.state.board[0][0]).toEqual(expect.objectContaining({ type: 'n', color: 'w' }));
+    expect(promoted.state.board[0][0]).toEqual(expect.objectContaining({ type: 'q', color: 'w' }));
     expect(promoted.state.pendingPromotion).toBeNull();
   });
 
