@@ -34,3 +34,30 @@ test('plays a legal move and receives a legal CPU reply', async ({ page }) => {
   await expect(page.getByRole('status')).toContainText(/User's turn|Your turn/, { timeout: 10_000 });
   await expect(page.locator('.move-history')).toContainText(/e4\s+\S+/, { timeout: 10_000 });
 });
+
+
+test('requires an explicit promotion choice in the browser', async ({ page }) => {
+  const fen = '4k3/P7/8/8/8/8/8/4K3 w - - 0 1';
+  await page.goto(`/?testFen=${encodeURIComponent(fen)}`);
+
+  await page.getByRole('button', { name: 'a7 white pawn' }).click();
+  await page.getByRole('button', { name: 'a8 empty square' }).click();
+
+  await expect(page.getByRole('group', { name: 'Choose promotion piece' })).toBeVisible();
+  await page.getByRole('button', { name: 'Promote to queen' }).click();
+  await expect(page.getByRole('button', { name: 'a8 white queen' })).toBeVisible();
+});
+
+test('shows terminal outcome and reset starts a new game', async ({ page }) => {
+  const fen = '7k/5Q2/6K1/8/8/8/8/8 w - - 0 1';
+  await page.goto(`/?testFen=${encodeURIComponent(fen)}`);
+
+  await page.getByRole('button', { name: 'f7 white queen' }).click();
+  await page.getByRole('button', { name: 'g7 empty square' }).click();
+  await expect(page.getByRole('status')).toContainText(/checkmate/i);
+
+  await page.getByRole('button', { name: 'Reset game' }).click();
+  await expect(page.getByRole('status')).toHaveText("User's turn");
+  await expect(page.getByRole('button', { name: 'e2 white pawn' })).toBeVisible();
+  await expect(page.locator('.move-history')).toContainText('No moves yet');
+});

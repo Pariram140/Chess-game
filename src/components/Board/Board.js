@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Piece from '../Piece/Piece';
 import { createGameController } from '../../game/gameController';
+import { createChessDomain } from '../../game/chessDomain';
 import { createRandomCpuStrategy } from '../../game/randomCpuStrategy';
 import { GAME_PHASES } from '../../game/gameState';
 import './Board.css';
@@ -25,7 +26,18 @@ function describeStatus(state) {
 
 function createDefaultController() {
   const randomStrategy = createRandomCpuStrategy();
+  const developmentFen = process.env.NODE_ENV !== 'production'
+    ? new URLSearchParams(window.location.search).get('testFen')
+    : null;
+  let useDevelopmentFen = Boolean(developmentFen);
   return createGameController({
+    createDomain: (fen) => {
+      if (useDevelopmentFen) {
+        useDevelopmentFen = false;
+        return createChessDomain(developmentFen);
+      }
+      return createChessDomain(fen);
+    },
     cpuStrategy: async (request) => {
       await new Promise((resolve) => window.setTimeout(resolve, 350));
       return randomStrategy(request);
