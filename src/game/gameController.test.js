@@ -7,7 +7,7 @@ const MATE_IN_ONE_FEN = '7k/5Q2/6K1/8/8/8/8/8 w - - 0 1';
 
 describe('game controller', () => {
   test('initializes the standard position in the player phase', () => {
-    const controller = createGameController();
+    const controller = createGameController({ cpuStrategy: null });
     const state = controller.getState();
 
     expect(state.phase).toBe(GAME_PHASES.PLAYER_TURN);
@@ -18,7 +18,7 @@ describe('game controller', () => {
   });
 
   test('accepts a legal player move and updates the authoritative snapshot', () => {
-    const controller = createGameController();
+    const controller = createGameController({ cpuStrategy: null });
 
     const result = controller.handlePlayerMove({ from: 'e2', to: 'e4' });
 
@@ -30,7 +30,7 @@ describe('game controller', () => {
   });
 
   test('rejects illegal moves without changing state or history', () => {
-    const controller = createGameController();
+    const controller = createGameController({ cpuStrategy: null });
     const before = controller.getState();
 
     expect(controller.handlePlayerMove({ from: 'e2', to: 'e5' }).reason).toBe('ILLEGAL_MOVE');
@@ -38,7 +38,7 @@ describe('game controller', () => {
   });
 
   test('locks player input outside the player phase', () => {
-    const controller = createGameController();
+    const controller = createGameController({ cpuStrategy: null });
     controller.handlePlayerMove({ from: 'e2', to: 'e4' });
     const before = controller.getState();
 
@@ -48,6 +48,7 @@ describe('game controller', () => {
 
   test('requires promotion selection before changing the board', () => {
     const controller = createGameController({
+      cpuStrategy: null,
       createDomain: () => createChessDomain(PROMOTION_FEN),
     });
     const before = controller.getState();
@@ -72,6 +73,7 @@ describe('game controller', () => {
 
   test('moves to GAME_OVER when the accepted player move checkmates', () => {
     const controller = createGameController({
+      cpuStrategy: null,
       createDomain: () => createChessDomain(MATE_IN_ONE_FEN),
     });
 
@@ -87,7 +89,7 @@ describe('game controller', () => {
   });
 
   test('reset restores the standard position and notifies subscribers', () => {
-    const controller = createGameController();
+    const controller = createGameController({ cpuStrategy: null });
     const listener = jest.fn();
     const unsubscribe = controller.subscribe(listener);
 
@@ -108,7 +110,7 @@ describe('game controller', () => {
   });
 
   test('returns defensive state snapshots', () => {
-    const controller = createGameController();
+    const controller = createGameController({ cpuStrategy: null });
     const state = controller.getState();
     state.board[0][0].type = 'q';
     state.moveHistory.push('tampered');

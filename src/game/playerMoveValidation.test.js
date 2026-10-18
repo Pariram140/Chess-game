@@ -2,7 +2,7 @@ import { createGameController } from './gameController';
 
 describe('player move validation', () => {
   test('rejects malformed move requests without changing the game', () => {
-    const controller = createGameController();
+    const controller = createGameController({ cpuStrategy: null });
     const before = controller.getState();
 
     expect(controller.handlePlayerMove().reason).toBe('INVALID_MOVE');
@@ -12,7 +12,7 @@ describe('player move validation', () => {
   });
 
   test('does not apply the same player move twice while the CPU owns the turn', () => {
-    const controller = createGameController();
+    const controller = createGameController({ cpuStrategy: null });
 
     const first = controller.handlePlayerMove({ from: 'e2', to: 'e4' });
     expect(first.accepted).toBe(true);

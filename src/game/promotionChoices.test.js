@@ -12,6 +12,7 @@ describe.each([
 ])('promotion to %s', (choice, expectedPiece, expectedPhase, expectedOutcome) => {
   test('applies the chosen piece and derives the resulting game state', () => {
     const controller = createGameController({
+      cpuStrategy: null,
       createDomain: () => createChessDomain(PROMOTION_FEN),
     });
 
@@ -33,7 +34,7 @@ describe.each([
 });
 
 test('rejects promotion selection when no promotion is pending', () => {
-  const controller = createGameController();
+  const controller = createGameController({ cpuStrategy: null });
   const before = controller.getState();
 
   expect(controller.choosePromotion('q')).toMatchObject({
