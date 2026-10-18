@@ -20,10 +20,6 @@ function cloneSnapshot(snapshot) {
   };
 }
 
-/**
- * Coordinates the lifecycle and keeps the chess domain private to the
- * controller. CPU results are checked against legal moves for their position.
- */
 export function createGameController({
   createDomain = createChessDomain,
   cpuStrategy = createRandomCpuStrategy(),
@@ -38,10 +34,7 @@ export function createGameController({
       ...state,
       ...cloneSnapshot(domain.getSnapshot()),
       pendingPromotion: state.pendingPromotion
-        ? {
-            ...state.pendingPromotion,
-            choices: [...state.pendingPromotion.choices],
-          }
+        ? { ...state.pendingPromotion, choices: [...state.pendingPromotion.choices] }
         : null,
     };
   }
@@ -52,13 +45,10 @@ export function createGameController({
   }
 
   function setPhase(event, gameOver = false) {
-    state = {
-      ...state,
-      phase: transitionGamePhase(state.phase, event, { gameOver }),
-    };
+    state = { ...state, phase: transitionGamePhase(state.phase, event, { gameOver }) };
   }
 
-  async function runCpuTurn() {
+  async function runCpuTurn(attempt = 0) {
     if (state.phase !== GAME_PHASES.CPU_THINKING || !cpuStrategy) return;
     const requestGeneration = generation;
     try {
@@ -69,9 +59,7 @@ export function createGameController({
       if (requestGeneration !== generation || state.phase !== GAME_PHASES.CPU_THINKING) return;
 
       const result = domain.makeMove(move);
-      if (!result.accepted) {
-        throw new Error(`CPU move rejected by domain: ${result.reason}`);
-      }
+      if (!result.accepted) throw new Error(`CPU move rejected by domain: ${result.reason}`);
 
       const terminal = result.snapshot.outcome.status !== 'ongoing';
       state = {
@@ -86,10 +74,14 @@ export function createGameController({
       publish();
     } catch (error) {
       if (requestGeneration !== generation || state.phase !== GAME_PHASES.CPU_THINKING) return;
-      state = {
-        ...state,
-        cpuError: error instanceof Error ? error.message : 'CPU strategy failed.',
-      };
+      const message = error instanceof Error ? error.message : 'CPU strategy failed.';
+      if (attempt === 0) {
+        state = { ...state, cpuError: `Retrying CPU move: ${message}` };
+        publish();
+        void runCpuTurn(1);
+        return;
+      }
+      state = { ...state, cpuError: message };
       setPhase(GAME_EVENTS.CPU_MOVE_FAILED);
       publish();
     }
@@ -136,10 +128,7 @@ export function createGameController({
       return { ...result, state: getState() };
     }
 
-    if (!result.accepted) {
-      return { ...result, state: getState() };
-    }
-
+    if (!result.accepted) return { ...result, state: getState() };
     return applyAcceptedMove(result, GAME_EVENTS.PLAYER_MOVE_ACCEPTED);
   }
 
@@ -147,18 +136,28 @@ export function createGameController({
     if (state.phase !== GAME_PHASES.PROMOTION_PENDING || !state.pendingPromotion) {
       return { accepted: false, reason: 'WRONG_PHASE', state: getState() };
     }
-
     if (!state.pendingPromotion.choices.includes(piece)) {
       return { accepted: false, reason: 'INVALID_PROMOTION', state: getState() };
     }
 
     const { from, to } = state.pendingPromotion;
     const result = domain.makeMove({ from, to, promotion: piece });
-    if (!result.accepted) {
-      return { ...result, state: getState() };
-    }
-
+    if (!result.accepted) return { ...result, state: getState() };
     return applyAcceptedMove(result, GAME_EVENTS.PROMOTION_COMPLETED);
+  }
+
+  function retryCpuMove() {
+    if (state.phase !== GAME_PHASES.CPU_ERROR) {
+      return { accepted: false, reason: 'WRONG_PHASE', state: getState() };
+    }
+    if (!cpuStrategy) {
+      return { accepted: false, reason: 'NO_CPU_STRATEGY', state: getState() };
+    }
+    setPhase(GAME_EVENTS.CPU_RETRY);
+    state = { ...state, cpuError: null };
+    publish();
+    void runCpuTurn();
+    return { accepted: true, state: getState() };
   }
 
   function reset() {
@@ -170,18 +169,10 @@ export function createGameController({
   }
 
   function subscribe(listener) {
-    if (typeof listener !== 'function') {
-      throw new TypeError('Listener must be a function');
-    }
+    if (typeof listener !== 'function') throw new TypeError('Listener must be a function');
     listeners.add(listener);
     return () => listeners.delete(listener);
   }
 
-  return Object.freeze({
-    getState,
-    handlePlayerMove,
-    choosePromotion,
-    reset,
-    subscribe,
-  });
+  return Object.freeze({ getState, handlePlayerMove, choosePromotion, retryCpuMove, reset, subscribe });
 }
