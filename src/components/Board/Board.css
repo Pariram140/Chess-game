@@ -29,3 +29,16 @@
 .empty-move-history{margin:0;padding:17px 14px;color:var(--text-muted);font-size:.82rem;line-height:1.55}
 @media(max-width:600px){.game-status{min-height:42px;margin:10px 0;font-size:.82rem}.board{border-width:3px;border-radius:4px}.square:focus-visible{outline-offset:-3px}.chess-game .game-actions button,.promotion-picker button{min-height:44px}.capture-ring{border-width:3px}.move-pair{padding-right:10px;padding-left:10px}}
 @media(prefers-reduced-motion:reduce){.chess-game .game-actions button,.promotion-picker button{transition:none}}
+
+.game-status.is-promotion{border-color:#c9b36b;background:#fff8df}
+.terminal-summary,.cpu-recovery{display:flex;flex-direction:column;gap:6px;margin:0 0 12px;padding:12px 14px;border:1px solid var(--border-subtle);border-radius:10px;background:var(--ivory);color:var(--text-main);font-size:.82rem;line-height:1.5}
+.terminal-summary strong{color:var(--forest-deep);font-size:.9rem}
+.cpu-recovery{border-color:#e5b9b1;background:#fff0ec}
+.cpu-recovery p,.promotion-prompt{margin:0 0 9px;color:var(--text-muted);font-size:.82rem;line-height:1.5}
+.secondary-action{align-self:flex-start;min-height:40px;padding:8px 13px;border:1px solid var(--forest);border-radius:9px;background:var(--surface);color:var(--forest-deep);cursor:pointer;font-size:.82rem;font-weight:750}
+.secondary-action:hover{background:var(--sage)}
+.secondary-action:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px}
+.promotion-section{margin-bottom:12px;padding:12px;border:1px solid #c9b36b;border-radius:10px;background:#fff8df}
+.promotion-section .promotion-prompt{color:#5e4b1d}
+.promotion-picker{margin-bottom:0}
+@media(max-width:600px){.secondary-action{min-height:44px}.terminal-summary,.cpu-recovery{padding:11px}}
