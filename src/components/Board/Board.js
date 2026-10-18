@@ -86,7 +86,8 @@ function Board() {
               const square = `${FILES[colIndex]}${8 - rowIndex}`;
               const isSelected = selectedSquare === square;
               const color = piece ? (piece.color === 'w' ? 'white' : 'black') : null;
-              const pieceLabel = piece ? `${color} ${piece.type}` : 'empty square';
+              const pieceNames = { p: 'pawn', n: 'knight', b: 'bishop', r: 'rook', q: 'queen', k: 'king' };
+              const pieceLabel = piece ? `${color} ${pieceNames[piece.type]}` : 'empty square';
               return (
                 <button
                   type="button"
