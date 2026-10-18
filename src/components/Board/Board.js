@@ -1,58 +1,40 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Chess } from 'chess.js';
 import Piece from '../Piece/Piece';
+import { createGameController } from '../../game/gameController';
+import { GAME_PHASES } from '../../game/gameState';
 import './Board.css';
 
 const FILES = 'abcdefgh';
 
-const describeStatus = (game) => {
-  if (game.isCheckmate()) {
-    return game.turn() === 'w' ? 'Checkmate — CPU wins' : 'Checkmate — you win';
+function describeStatus(state) {
+  if (state.phase === GAME_PHASES.CPU_THINKING) return "CPU's turn — thinking…";
+  if (state.phase === GAME_PHASES.CPU_ERROR) return "CPU's turn — move failed";
+  if (state.phase === GAME_PHASES.PROMOTION_PENDING) return 'Choose a promotion piece';
+  if (state.phase === GAME_PHASES.GAME_OVER) {
+    if (state.outcome.status === 'checkmate') {
+      return state.outcome.winner === 'w' ? 'Checkmate — you win' : 'Checkmate — CPU wins';
+    }
+    if (state.outcome.status === 'stalemate') return 'Draw — stalemate';
+    return 'Draw — game over';
   }
-  if (game.isStalemate()) return 'Draw — stalemate';
-  if (game.isDraw()) return 'Draw — game over';
-  if (game.isCheck()) return game.turn() === 'w' ? "Your turn — you're in check" : "CPU's turn — check";
-  return game.turn() === 'w' ? "User's turn" : "CPU's turn";
-};
+  if (state.outcome.inCheck) return state.turn === 'w' ? "Your turn — you're in check" : "CPU's turn — check";
+  return state.turn === 'w' ? "User's turn" : "CPU's turn";
+}
 
 function Board() {
-  const gameRef = useRef(new Chess());
-  const cpuTimerRef = useRef(null);
-  const [position, setPosition] = useState(() => gameRef.current.board());
+  const controllerRef = useRef(null);
+  if (!controllerRef.current) controllerRef.current = createGameController();
+  const controller = controllerRef.current;
+  const [gameState, setGameState] = useState(() => controller.getState());
   const [selectedSquare, setSelectedSquare] = useState(null);
-  const [status, setStatus] = useState("User's turn");
-  const [moveHistory, setMoveHistory] = useState([]);
 
-  useEffect(() => () => window.clearTimeout(cpuTimerRef.current), []);
-
-  const updateFromGame = () => {
-    const game = gameRef.current;
-    setPosition(game.board());
-    setMoveHistory(game.history());
-    setStatus(describeStatus(game));
-  };
-
-  const scheduleCpuMove = () => {
-    window.clearTimeout(cpuTimerRef.current);
-    setStatus("CPU's turn — thinking…");
-    cpuTimerRef.current = window.setTimeout(() => {
-      const game = gameRef.current;
-      if (game.isGameOver() || game.turn() !== 'b') return;
-      const legalMoves = game.moves();
-      if (legalMoves.length === 0) {
-        updateFromGame();
-        return;
-      }
-      game.move(legalMoves[Math.floor(Math.random() * legalMoves.length)]);
-      updateFromGame();
-    }, 350);
-  };
+  useEffect(() => controller.subscribe(setGameState), [controller]);
 
   const handleSquareClick = (square) => {
-    const game = gameRef.current;
-    if (game.isGameOver() || game.turn() !== 'w') return;
+    const state = controller.getState();
+    if (state.phase !== GAME_PHASES.PLAYER_TURN || state.turn !== 'w') return;
 
-    const piece = game.get(square);
+    const piece = state.board[8 - Number(square[1])][FILES.indexOf(square[0])];
     if (!selectedSquare) {
       if (piece?.color === 'w') setSelectedSquare(square);
       return;
@@ -63,22 +45,20 @@ function Board() {
       return;
     }
 
-    try {
-      game.move({ from: selectedSquare, to: square, promotion: 'q' });
+    const result = controller.handlePlayerMove({ from: selectedSquare, to: square });
+    if (result.accepted || result.reason === 'PROMOTION_REQUIRED') {
       setSelectedSquare(null);
-      updateFromGame();
-      if (!game.isGameOver() && game.turn() === 'b') scheduleCpuMove();
-    } catch {
-      // Invalid moves are rejected by chess.js; allow selecting another white piece.
-      if (piece?.color === 'w') setSelectedSquare(square);
+      return;
     }
+
+    if (piece?.color === 'w') setSelectedSquare(square);
   };
 
   return (
     <section className="chess-game" aria-label="Chess game board">
-      <div className="game-status" role="status" aria-live="polite">{status}</div>
+      <div className="game-status" role="status" aria-live="polite">{describeStatus(gameState)}</div>
       <div className="board" role="group" aria-label="Chessboard">
-        {position.map((row, rowIndex) => (
+        {gameState.board.map((row, rowIndex) => (
           <div className="board-row" key={rowIndex}>
             {row.map((piece, colIndex) => {
               const square = `${FILES[colIndex]}${8 - rowIndex}`;
@@ -93,6 +73,7 @@ function Board() {
                   className={`square ${(rowIndex + colIndex) % 2 === 0 ? 'dark' : 'light'} ${isSelected ? 'selected' : ''}`}
                   aria-label={`${square} ${pieceLabel}`}
                   aria-pressed={isSelected}
+                  disabled={gameState.phase !== GAME_PHASES.PLAYER_TURN}
                   onClick={() => handleSquareClick(square)}
                 >
                   {piece && <Piece type={`${color}-${piece.type}`} />}
@@ -104,7 +85,7 @@ function Board() {
       </div>
       <div className="move-history" aria-label="Move history">
         <span className="move-history-label">Moves</span>
-        <span>{moveHistory.length ? moveHistory.join(' ') : 'No moves yet'}</span>
+        <span>{gameState.moveHistory.length ? gameState.moveHistory.join(' ') : 'No moves yet'}</span>
       </div>
     </section>
   );
