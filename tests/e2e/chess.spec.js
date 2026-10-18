@@ -56,7 +56,7 @@ test('shows terminal outcome and reset starts a new game', async ({ page }) => {
   await page.getByRole('button', { name: 'g7 empty square' }).click();
   await expect(page.getByRole('status')).toContainText(/checkmate/i);
 
-  await page.getByRole('button', { name: 'Reset game' }).click();
+  await page.getByRole('button', { name: 'New game' }).click();
   await expect(page.getByRole('status')).toHaveText("User's turn");
   await expect(page.getByRole('button', { name: 'e2 white pawn' })).toBeVisible();
   await expect(page.locator('.move-history')).toContainText('No moves yet');
