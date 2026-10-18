@@ -64,6 +64,11 @@ function Board({ controllerFactory = createDefaultController }) {
     if (piece?.color === 'w') setSelectedSquare(square);
   };
 
+  const resetGame = () => {
+    controller.reset();
+    setSelectedSquare(null);
+  };
+
   const choosePromotion = (piece) => {
     const result = controller.choosePromotion(piece);
     if (result.accepted) setSelectedSquare(null);
@@ -72,6 +77,7 @@ function Board({ controllerFactory = createDefaultController }) {
   return (
     <section className="chess-game" aria-label="Chess game board">
       <div className="game-status" role="status" aria-live="polite">{describeStatus(gameState)}</div>
+      <button type="button" onClick={resetGame}>Reset game</button>
       {gameState.phase === GAME_PHASES.PROMOTION_PENDING && (
         <div className="promotion-picker" role="group" aria-label="Choose promotion piece">
           {gameState.pendingPromotion.choices.map((piece) => (
