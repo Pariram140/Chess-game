@@ -12,9 +12,7 @@ test('renders all 64 squares and the initial position', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'e7 black pawn' })).toBeVisible();
   const renderedPieces = page.locator('.board .piece');
   await expect(renderedPieces).toHaveCount(32);
-  await expect.poll(() => renderedPieces.evaluateAll((pieces) =>
-    pieces.every((piece) => piece.textContent.trim().length > 0)
-  )).toBe(true);
+  await expect.poll(() => renderedPieces.locator('svg').count()).toBe(32);
   await expect(page.locator('.move-history')).toContainText('No moves yet');
 });
 
@@ -34,12 +32,9 @@ test('plays a legal move and receives a legal CPU reply', async ({ page }) => {
 
   await expect(page.getByRole('button', { name: 'e4 white pawn' })).toBeVisible();
   await expect(page.getByRole('status')).toContainText(/CPU's turn/);
-
-  // The CPU reply is random, so assert the turn and move count rather than a specific move.
   await expect(page.getByRole('status')).toContainText(/User's turn|Your turn/, { timeout: 10_000 });
   await expect(page.locator('.move-history')).toContainText(/e4\s+\S+/, { timeout: 10_000 });
 });
-
 
 test('requires an explicit promotion choice in the browser', async ({ page }) => {
   const fen = '4k3/P7/8/8/8/8/8/4K3 w - - 0 1';
