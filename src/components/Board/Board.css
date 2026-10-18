@@ -5,6 +5,11 @@
 .board{width:min(100%,560px);margin:0 auto;overflow:hidden;border:5px solid var(--surface);border-radius:7px;background:var(--surface);box-shadow:0 10px 24px rgba(36,57,42,.15),0 0 0 1px rgba(36,75,59,.13)}
 .board-row{display:flex;width:100%}.square{position:relative;display:flex;align-items:center;justify-content:center;flex:1 1 12.5%;min-width:0;aspect-ratio:1;padding:0;border:0;border-radius:0;cursor:pointer;color:inherit}
 .square.light{background:var(--board-light)}.square.dark{background:var(--board-dark)}.square.selected{background:#e4c96e;box-shadow:inset 0 0 0 3px rgba(92,72,0,.42)}.square:disabled{cursor:default}.square:focus-visible{z-index:1;outline:3px solid var(--focus-ring);outline-offset:-4px}
+.square.last-move{background-image:linear-gradient(rgba(246,210,91,.32),rgba(246,210,91,.32))}
+.square.king-in-check{background-image:repeating-linear-gradient(135deg,rgba(151,53,45,.28) 0 5px,rgba(255,244,235,.12) 5px 10px);box-shadow:inset 0 0 0 3px #9b352d}
+.move-dot{position:absolute;width:23%;height:23%;border-radius:50%;background:rgba(24,55,44,.48);pointer-events:none}
+.capture-ring{position:absolute;inset:5%;border:4px solid rgba(36,75,59,.68);border-radius:50%;pointer-events:none}
+.square.last-move .move-dot,.square.king-in-check .move-dot{z-index:1}
 .promotion-picker{display:flex;flex-wrap:wrap;gap:4px}.move-history{display:flex;flex-wrap:wrap;gap:8px;max-height:132px;margin-top:16px;padding:13px 14px;overflow-y:auto;border:1px solid var(--border-subtle);border-radius:12px;background:var(--ivory);color:var(--text-muted);font-size:.82rem;line-height:1.6;overflow-wrap:anywhere}.move-history-label{color:var(--forest);font-weight:800}
-@media(max-width:600px){.game-status{min-height:42px;margin:10px 0;font-size:.82rem}.board{border-width:3px;border-radius:4px}.square:focus-visible{outline-offset:-3px}.chess-game>button,.promotion-picker button{min-height:44px}}
+@media(max-width:600px){.game-status{min-height:42px;margin:10px 0;font-size:.82rem}.board{border-width:3px;border-radius:4px}.square:focus-visible{outline-offset:-3px}.chess-game>button,.promotion-picker button{min-height:44px}.capture-ring{border-width:3px}}
 @media(prefers-reduced-motion:reduce){.chess-game>button,.promotion-picker button{transition:none}}
