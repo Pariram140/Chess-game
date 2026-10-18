@@ -13,9 +13,7 @@ function cloneSnapshot(snapshot) {
     fen: snapshot.fen,
     turn: snapshot.turn,
     moveHistory: [...snapshot.moveHistory],
-    board: snapshot.board.map((row) =>
-      row.map((piece) => (piece ? { ...piece } : null)),
-    ),
+    board: snapshot.board.map((row) => row.map((piece) => (piece ? { ...piece } : null))),
     outcome: { ...snapshot.outcome },
   };
 }
@@ -25,7 +23,7 @@ export function createGameController({
   cpuStrategy = createRandomCpuStrategy(),
 } = {}) {
   let domain = createDomain(createInitialGameState().fen);
-  let state = createInitialGameState();
+  let state = { ...createInitialGameState(), lastMove: null };
   const listeners = new Set();
   let generation = 0;
 
@@ -33,6 +31,8 @@ export function createGameController({
     return {
       ...state,
       ...cloneSnapshot(domain.getSnapshot()),
+      legalMoves: domain.getLegalMoves(),
+      lastMove: state.lastMove ? { ...state.lastMove } : null,
       pendingPromotion: state.pendingPromotion
         ? { ...state.pendingPromotion, choices: [...state.pendingPromotion.choices] }
         : null,
@@ -66,6 +66,7 @@ export function createGameController({
         ...state,
         fen: result.snapshot.fen,
         moveHistory: [...result.snapshot.moveHistory],
+        lastMove: { from: result.move.from, to: result.move.to },
         selectedSquare: null,
         pendingPromotion: null,
         cpuError: null,
@@ -93,6 +94,7 @@ export function createGameController({
       ...state,
       fen: result.snapshot.fen,
       moveHistory: [...result.snapshot.moveHistory],
+      lastMove: { from: result.move.from, to: result.move.to },
       selectedSquare: null,
       pendingPromotion: null,
       cpuError: null,
@@ -163,7 +165,7 @@ export function createGameController({
   function reset() {
     generation += 1;
     domain = createDomain(createInitialGameState().fen);
-    state = createInitialGameState();
+    state = { ...createInitialGameState(), lastMove: null };
     publish();
     return getState();
   }
