@@ -33,7 +33,7 @@ test('plays a legal move and receives a legal CPU reply', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'e4 white pawn' })).toBeVisible();
   await expect(page.getByRole('status')).toContainText(/CPU's turn/);
   await expect(page.getByRole('status')).toContainText(/User's turn|Your turn/, { timeout: 10_000 });
-  await expect(page.locator('.move-history')).toContainText(/e4\s+\S+/, { timeout: 10_000 });
+  await expect(page.locator('.move-san').first()).toHaveText('e4', { timeout: 10_000 });
 });
 
 test('requires an explicit promotion choice in the browser', async ({ page }) => {
