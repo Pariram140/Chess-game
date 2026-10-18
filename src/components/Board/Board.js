@@ -74,8 +74,6 @@ function Board() {
     }
   };
 
-  const game = gameRef.current;
-
   return (
     <section className="chess-game" aria-label="Chess game board">
       <div className="game-status" role="status" aria-live="polite">{status}</div>
