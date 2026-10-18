@@ -6,10 +6,11 @@ import { GAME_PHASES } from '../../game/gameState';
 import './Board.css';
 
 const FILES = 'abcdefgh';
+const PROMOTION_LABELS = { q: 'queen', r: 'rook', b: 'bishop', n: 'knight' };
 
 function describeStatus(state) {
   if (state.phase === GAME_PHASES.CPU_THINKING) return "CPU's turn — thinking…";
-  if (state.phase === GAME_PHASES.CPU_ERROR) return "CPU's turn — move failed";
+  if (state.phase === GAME_PHASES.CPU_ERROR) return `CPU move failed: ${state.cpuError || 'unknown error'}`;
   if (state.phase === GAME_PHASES.PROMOTION_PENDING) return 'Choose a promotion piece';
   if (state.phase === GAME_PHASES.GAME_OVER) {
     if (state.outcome.status === 'checkmate') {
@@ -22,17 +23,19 @@ function describeStatus(state) {
   return state.turn === 'w' ? "User's turn" : "CPU's turn";
 }
 
-function Board() {
+function createDefaultController() {
+  const randomStrategy = createRandomCpuStrategy();
+  return createGameController({
+    cpuStrategy: async (request) => {
+      await new Promise((resolve) => window.setTimeout(resolve, 350));
+      return randomStrategy(request);
+    },
+  });
+}
+
+function Board({ controllerFactory = createDefaultController }) {
   const controllerRef = useRef(null);
-  if (!controllerRef.current) {
-    const randomStrategy = createRandomCpuStrategy();
-    controllerRef.current = createGameController({
-      cpuStrategy: async (request) => {
-        await new Promise((resolve) => window.setTimeout(resolve, 350));
-        return randomStrategy(request);
-      },
-    });
-  }
+  if (!controllerRef.current) controllerRef.current = controllerFactory();
   const controller = controllerRef.current;
   const [gameState, setGameState] = useState(() => controller.getState());
   const [selectedSquare, setSelectedSquare] = useState(null);
@@ -48,7 +51,6 @@ function Board() {
       if (piece?.color === 'w') setSelectedSquare(square);
       return;
     }
-
     if (selectedSquare === square) {
       setSelectedSquare(null);
       return;
@@ -59,13 +61,34 @@ function Board() {
       setSelectedSquare(null);
       return;
     }
-
     if (piece?.color === 'w') setSelectedSquare(square);
+  };
+
+  const choosePromotion = (piece) => {
+    const result = controller.choosePromotion(piece);
+    if (result.accepted) setSelectedSquare(null);
   };
 
   return (
     <section className="chess-game" aria-label="Chess game board">
       <div className="game-status" role="status" aria-live="polite">{describeStatus(gameState)}</div>
+      {gameState.phase === GAME_PHASES.PROMOTION_PENDING && (
+        <div className="promotion-picker" role="group" aria-label="Choose promotion piece">
+          {gameState.pendingPromotion.choices.map((piece) => (
+            <button
+              type="button"
+              key={piece}
+              onClick={() => choosePromotion(piece)}
+              aria-label={`Promote to ${PROMOTION_LABELS[piece]}`}
+            >
+              {PROMOTION_LABELS[piece]}
+            </button>
+          ))}
+        </div>
+      )}
+      {gameState.phase === GAME_PHASES.CPU_ERROR && (
+        <button type="button" onClick={() => controller.retryCpuMove()}>Retry CPU move</button>
+      )}
       <div className="board" role="group" aria-label="Chessboard">
         {gameState.board.map((row, rowIndex) => (
           <div className="board-row" key={rowIndex}>
