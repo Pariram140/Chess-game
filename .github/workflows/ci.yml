@@ -55,27 +55,3 @@ jobs:
           path: test-results/
           if-no-files-found: ignore
           retention-days: 7
-
-  verify-render-deployment:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: test-and-build
-    runs-on: ubuntu-latest
-    timeout-minutes: 12
-    steps:
-      - name: Wait for Render to publish this commit
-        env:
-          EXPECTED_COMMIT: ${{ github.sha }}
-          DEPLOYMENT_INFO_URL: https://pari-chess-game.onrender.com/deployment-info.json
-        run: |
-          for attempt in $(seq 1 20); do
-            response=$(curl --fail --silent --show-error --max-time 10 "${DEPLOYMENT_INFO_URL}?run=${GITHUB_RUN_ID}&attempt=${attempt}" 2>/dev/null || true)
-            actual_commit=$(printf '%s' "$response" | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{try{process.stdout.write(JSON.parse(s).commit || '')}catch{process.stdout.write('')}})")
-            if [ "$actual_commit" = "$EXPECTED_COMMIT" ]; then
-              echo "Render is serving expected commit $EXPECTED_COMMIT"
-              exit 0
-            fi
-            echo "Render has not published expected commit yet (attempt $attempt/20; current: ${actual_commit:-unavailable})"
-            sleep 30
-          done
-          echo "::error::Render did not publish main commit $EXPECTED_COMMIT within 10 minutes. Check Render auto-deploy configuration and events."
-          exit 1

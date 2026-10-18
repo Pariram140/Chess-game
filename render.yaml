@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: pari-chess-game-docker
+    runtime: docker
+    plan: free
+    branch: main
+    autoDeployTrigger: checksPass
+    healthCheckPath: /
+    region: singapore
