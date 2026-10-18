@@ -52,10 +52,20 @@ describe('Board lifecycle UI', () => {
   });
 });
 
+test('move history is presented in numbered white/black pairs', () => {
+  render(<Board controllerFactory={() => createGameController({ cpuStrategy: null })} />);
+  fireEvent.click(screen.getByRole('button', { name: 'e2 white pawn' }));
+  fireEvent.click(screen.getByRole('button', { name: /e4 empty square, legal move available/i }));
+  const history = screen.getByRole('list', { name: 'Recorded moves' });
+  expect(history).toHaveTextContent('1.');
+  expect(history).toHaveTextContent('e4');
+  expect(screen.getByText('1 ply')).toBeInTheDocument();
+});
+
 test('reset clears selected-square state and restores the initial position', () => {
   render(<Board controllerFactory={() => createGameController({ cpuStrategy: null })} />);
   fireEvent.click(screen.getByRole('button', { name: 'e2 white pawn' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Reset game' }));
+  fireEvent.click(screen.getByRole('button', { name: /New game/i }));
   expect(screen.getByRole('button', { name: 'e2 white pawn' })).toHaveAttribute('aria-pressed', 'false');
   expect(screen.getByRole('status')).toHaveTextContent(/user's turn/i);
   expect(screen.getByLabelText('Move history')).toHaveTextContent('No moves yet');
