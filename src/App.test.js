@@ -1,10 +1,13 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders the chess game and initial position', () => {
+test('renders the responsive chess shell and initial position', () => {
   render(<App />);
 
   expect(screen.getByRole('heading', { name: /chess game/i })).toBeInTheDocument();
+  expect(screen.getByRole('main')).toBeInTheDocument();
+  expect(screen.getByRole('complementary', { name: /game guide/i })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /classic game/i })).toBeInTheDocument();
   expect(screen.getByRole('status')).toHaveTextContent(/user's turn/i);
   expect(screen.getByRole('button', { name: 'e2 white pawn' })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'e7 black pawn' })).toBeInTheDocument();
