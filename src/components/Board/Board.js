@@ -79,21 +79,35 @@ function Board({ controllerFactory = createDefaultController }) {
 
   return (
     <section className="chess-game" aria-label="Chess game board">
-      <div className={`game-status ${gameState.phase === GAME_PHASES.GAME_OVER ? 'is-terminal' : ''} ${gameState.phase === GAME_PHASES.CPU_ERROR ? 'has-error' : ''}`} role="status" aria-live="polite" aria-atomic="true">
+      <div className={`game-status ${gameState.phase === GAME_PHASES.GAME_OVER ? 'is-terminal' : ''} ${gameState.phase === GAME_PHASES.CPU_ERROR ? 'has-error' : ''} ${gameState.phase === GAME_PHASES.PROMOTION_PENDING ? 'is-promotion' : ''}`} role="status" aria-live="polite" aria-atomic="true">
         <span className="status-indicator" aria-hidden="true" />
         <span>{describeStatus(gameState)}</span>
       </div>
+      {gameState.phase === GAME_PHASES.GAME_OVER && (
+        <div className="terminal-summary" role="group" aria-label="Game result">
+          <strong>{gameState.outcome.status === 'checkmate' ? 'Game complete' : 'Game drawn'}</strong>
+          <span>{describeStatus(gameState)}. Start a new game whenever you're ready.</span>
+        </div>
+      )}
       <div className="game-actions" role="group" aria-label="Game actions">
         <button type="button" className="primary-action" onClick={resetGame}>
           <span aria-hidden="true">↻</span> New game
         </button>
       </div>
       {gameState.phase === GAME_PHASES.PROMOTION_PENDING && (
-        <div className="promotion-picker" role="group" aria-label="Choose promotion piece">
-          {gameState.pendingPromotion.choices.map((piece) => <button type="button" key={piece} onClick={() => choosePromotion(piece)} aria-label={`Promote to ${PROMOTION_LABELS[piece]}`}>{PROMOTION_LABELS[piece]}</button>)}
+        <div className="promotion-section">
+          <p className="promotion-prompt">Your pawn reached the final rank. Choose a piece.</p>
+          <div className="promotion-picker" role="group" aria-label="Choose promotion piece">
+            {gameState.pendingPromotion.choices.map((piece) => <button type="button" key={piece} onClick={() => choosePromotion(piece)} aria-label={`Promote to ${PROMOTION_LABELS[piece]}`}>{PROMOTION_LABELS[piece]}</button>)}
+          </div>
         </div>
       )}
-      {gameState.phase === GAME_PHASES.CPU_ERROR && <button type="button" onClick={() => controller.retryCpuMove()}>Retry CPU move</button>}
+      {gameState.phase === GAME_PHASES.CPU_ERROR && (
+        <div className="cpu-recovery" role="group" aria-label="Computer move recovery">
+          <p>The board is unchanged. Retry the computer's move or start a new game.</p>
+          <button type="button" className="secondary-action" onClick={() => controller.retryCpuMove()}>Retry CPU move</button>
+        </div>
+      )}
       <div className="board" role="group" aria-label="Chessboard">
         {gameState.board.map((row, rowIndex) => (
           <div className="board-row" key={rowIndex}>
