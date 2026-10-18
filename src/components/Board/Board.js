@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Piece from '../Piece/Piece';
 import { createGameController } from '../../game/gameController';
+import { createRandomCpuStrategy } from '../../game/randomCpuStrategy';
 import { GAME_PHASES } from '../../game/gameState';
 import './Board.css';
 
@@ -23,7 +24,15 @@ function describeStatus(state) {
 
 function Board() {
   const controllerRef = useRef(null);
-  if (!controllerRef.current) controllerRef.current = createGameController();
+  if (!controllerRef.current) {
+    const randomStrategy = createRandomCpuStrategy();
+    controllerRef.current = createGameController({
+      cpuStrategy: async (request) => {
+        await new Promise((resolve) => window.setTimeout(resolve, 350));
+        return randomStrategy(request);
+      },
+    });
+  }
   const controller = controllerRef.current;
   const [gameState, setGameState] = useState(() => controller.getState());
   const [selectedSquare, setSelectedSquare] = useState(null);
