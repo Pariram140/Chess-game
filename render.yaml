@@ -1,8 +1,9 @@
 services:
   - type: web
-    name: pari-chess-game
-    runtime: static
+    name: pari-chess-game-docker
+    runtime: docker
+    plan: free
     branch: main
-    buildCommand: npm ci && npm run build
-    staticPublishPath: ./build
     autoDeployTrigger: checksPass
+    healthCheckPath: /
+    region: singapore
