@@ -1,37 +1,70 @@
-/* components/Board.css */
-.board {
-    display: flex;
-    flex-direction: column; /* Display rows vertically */
-    border: 2px solid #333;
-    width: fit-content; /* Adjust width */
-    margin: 0 auto; /* Center the board */
-  }
-  
-  .board-row {
-    display: flex;
-  }
-  
-  .square {
-    width: 50px;
-    height: 50px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 1px solid #8B4513; /* Use a brown color for the border */
-    box-sizing: border-box; /* Include border in width/height calculation */
-    cursor: pointer; /* Add cursor pointer */
+.chess-game {
+  width: fit-content;
+  max-width: 100%;
+  margin: 1.25rem auto;
+}
 
-  }
-  
-  .square.white {
-    background-color: #f0d9b5;
-  }
-  
-  .square.Black {
-    background-color: #b58863;
-  }
-    
-  .square.black.selected,
-  .square.white.selected {
-    background-color: #ffc107; /* Change to any color you prefer */
-  }
+.game-status {
+  min-height: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.board {
+  overflow: hidden;
+  width: fit-content;
+  border: 3px solid #3d342b;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+}
+
+.board-row {
+  display: flex;
+}
+
+.square {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(36px, 10vw, 64px);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  color: inherit;
+}
+
+.square.light {
+  background: #f0d9b5;
+}
+
+.square.dark {
+  background: #b58863;
+}
+
+.square.selected {
+  background: #e5c84b;
+  box-shadow: inset 0 0 0 4px rgba(92, 72, 0, 0.45);
+}
+
+.square:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 3px solid #1565c0;
+  outline-offset: -3px;
+}
+
+.move-history {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  max-width: 100%;
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.move-history-label {
+  font-weight: 700;
+}
