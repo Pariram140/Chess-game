@@ -38,3 +38,11 @@ jobs:
 
       - name: Build production bundle
         run: npm run build
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save --package-lock=false @playwright/test
+          npx playwright install --with-deps chromium
+
+      - name: Run Playwright functional tests
+        run: npx playwright test
