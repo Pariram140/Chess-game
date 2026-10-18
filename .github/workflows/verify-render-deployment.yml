@@ -18,7 +18,7 @@ jobs:
       - name: Wait for Render to publish the tested commit
         env:
           EXPECTED_COMMIT: ${{ github.event.workflow_run.head_sha }}
-          DEPLOYMENT_INFO_URL: https://pari-chess-game.onrender.com/deployment-info.json
+          DEPLOYMENT_INFO_URL: https://pari-chess-game-docker.onrender.com/deployment-info.json
         run: |
           for attempt in $(seq 1 20); do
             response=$(curl --fail --silent --show-error --max-time 10 "${DEPLOYMENT_INFO_URL}?run=${GITHUB_RUN_ID}&attempt=${attempt}" 2>/dev/null || true)
@@ -30,5 +30,5 @@ jobs:
             echo "Render has not published expected commit yet (attempt $attempt/20; current: ${actual_commit:-unavailable})"
             sleep 30
           done
-          echo "::error::Render did not publish main commit $EXPECTED_COMMIT within 10 minutes. Check Render Blueprint sync, auto-deploy configuration, and events."
+          echo "::error::Render did not publish main commit $EXPECTED_COMMIT within 10 minutes. Check Render auto-deploy configuration and service events."
           exit 1
