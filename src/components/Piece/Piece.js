@@ -1,32 +1,32 @@
-// components/Piece.js
 import React from 'react';
 import './Piece.css';
 
-const Piece = ({ type }) => {
-  const getUnicodeSymbol = (pieceName, color) => {
-    switch (pieceName) {
-      case 'king':
-        return color === 'white' ? '\u2654' : '\u265A';
-      case 'queen':
-        return color === 'white' ? '\u2655' : '\u265B';
-      case 'rook':
-        return color === 'white' ? '\u2656' : '\u265C';
-      case 'bishop':
-        return color === 'white' ? '\u2657' : '\u265D';
-      case 'knight':
-        return color === 'white' ? '\u2658' : '\u265E';
-      case 'pawn':
-        return color === 'white' ? '\u2659' : '\u265F';
-      default:
-        return '';
-    }
-  };
+const UNICODE_SYMBOLS = {
+  white: {
+    k: '\u2654',
+    q: '\u2655',
+    r: '\u2656',
+    b: '\u2657',
+    n: '\u2658',
+    p: '\u2659',
+  },
+  black: {
+    k: '\u265A',
+    q: '\u265B',
+    r: '\u265C',
+    b: '\u265D',
+    n: '\u265E',
+    p: '\u265F',
+  },
+};
 
-  const [color, pieceName] = type.split('-');
+const Piece = ({ type }) => {
+  const [color, pieceType] = type.split('-');
+  const symbol = UNICODE_SYMBOLS[color]?.[pieceType] || '';
 
   return (
-    <div className={`piece ${type}`}>
-      {getUnicodeSymbol(pieceName, color)}
+    <div className={`piece ${type}`} aria-hidden="true">
+      {symbol}
     </div>
   );
 };
