@@ -80,4 +80,22 @@ describe('game state model', () => {
       ),
     ).toBe(GAME_PHASES.GAME_OVER);
   });
+
+  test('does not let a terminal-position override bypass transition validation', () => {
+    expect(() =>
+      transitionGamePhase(
+        GAME_PHASES.PLAYER_TURN,
+        GAME_EVENTS.CPU_MOVE_ACCEPTED,
+        { gameOver: true },
+      ),
+    ).toThrow(/Invalid game transition/);
+
+    expect(() =>
+      transitionGamePhase(
+        GAME_PHASES.GAME_OVER,
+        GAME_EVENTS.PLAYER_MOVE_ACCEPTED,
+        { gameOver: true },
+      ),
+    ).toThrow(/Invalid game transition/);
+  });
 });
