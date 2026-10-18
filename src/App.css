@@ -1,14 +1,33 @@
-.App {
-  min-height: 100vh;
-  padding: 1.5rem 1rem 2rem;
-  text-align: center;
-}
-
-.App h1 {
-  margin: 0;
-}
-
-.app-subtitle {
-  margin: 0.5rem 0 1rem;
-  color: #555;
-}
+.App{width:min(100% - 48px,1180px);min-height:100vh;margin:0 auto;padding:28px 0 20px}
+.app-header{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:0 0 28px;border-bottom:1px solid var(--border-subtle)}
+.brand-mark{display:inline-flex;align-items:center;gap:10px;color:var(--forest-deep);text-decoration:none;white-space:nowrap}
+.brand-icon{display:grid;width:38px;height:38px;place-items:center;border-radius:12px;background:var(--forest);color:var(--ivory);font-size:25px}
+.brand-name{font-family:var(--font-display);font-size:1.12rem;font-weight:700;letter-spacing:-.025em}
+.app-heading{flex:1;max-width:650px;text-align:right}
+.eyebrow{margin:0 0 8px;color:var(--forest);font-size:.7rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+.app-heading h1{margin:0;color:var(--forest-deep);font-family:var(--font-display);font-size:clamp(2rem,4vw,3.25rem);font-weight:600;letter-spacing:-.055em;line-height:1.08}
+.app-subtitle{max-width:600px;margin:10px 0 0 auto;color:var(--text-muted);font-size:.96rem;line-height:1.6}
+.game-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,290px);align-items:start;gap:24px;padding:28px 0}
+.board-panel,.companion-panel{min-width:0;border:1px solid var(--border-subtle);border-radius:var(--radius-xl);background:var(--surface);box-shadow:var(--shadow-card)}
+.board-panel{padding:clamp(16px,2.5vw,30px)}
+.panel-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+.panel-heading .eyebrow{margin-bottom:4px}
+.panel-heading h2,.companion-panel h2{margin:0;color:var(--forest-deep);font-family:var(--font-display);font-size:1.55rem;font-weight:600;letter-spacing:-.035em}
+.match-badge{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid var(--border-subtle);border-radius:999px;background:var(--ivory);color:var(--text-muted);font-size:.72rem;font-weight:700;white-space:nowrap}
+.match-badge span{width:7px;height:7px;border-radius:50%;background:var(--forest)}
+.companion-panel{padding:25px 22px}
+.companion-emblem{display:grid;width:48px;height:48px;margin-bottom:26px;place-items:center;border-radius:15px;background:var(--sage);color:var(--forest);font-size:30px}
+.companion-panel h2{font-size:1.8rem;line-height:1.15}
+.companion-copy{margin:12px 0 0;color:var(--text-muted);font-size:.9rem;line-height:1.7}
+.guide-divider{height:1px;margin:22px 0;background:var(--border-subtle)}
+.guide-item{display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;margin:18px 0}
+.guide-number{color:var(--walnut);font-family:var(--font-display);font-size:.95rem;font-weight:700}
+.guide-item h3{margin:0 0 5px;color:var(--text-main);font-size:.88rem;font-weight:750}
+.guide-item p{margin:0;color:var(--text-muted);font-size:.8rem;line-height:1.55}
+.companion-footer{display:flex;align-items:flex-start;gap:8px;margin-top:26px;padding-top:16px;border-top:1px solid var(--border-subtle);color:var(--forest);font-family:var(--font-display);font-size:.85rem;font-style:italic;line-height:1.5}
+.companion-footer span{font-style:normal}
+.app-footer{display:flex;justify-content:space-between;gap:16px;padding:16px 2px 0;border-top:1px solid var(--border-subtle);color:var(--text-muted);font-size:.68rem;letter-spacing:.08em}
+.app-footer span:first-child{color:var(--forest);font-weight:800;letter-spacing:.14em}
+@media(max-width:900px){.App{width:min(100% - 32px,720px);padding-top:22px}.game-layout{grid-template-columns:minmax(0,1fr);gap:18px;padding:20px 0}.companion-panel{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:16px;align-items:start;padding:20px}.companion-emblem{grid-row:span 2;margin:0}.companion-panel>.eyebrow{align-self:end;margin-bottom:5px}.companion-panel h2,.companion-copy,.guide-divider,.guide-item,.companion-footer{grid-column:1/-1}.companion-panel h2{grid-row:2}.companion-copy{margin-top:10px}.guide-divider{margin:18px 0}.guide-item{margin:9px 0}.companion-footer{margin-top:16px}}
+@media(max-width:600px){.App{width:min(100% - 20px,480px);padding-top:16px}.app-header{display:block;padding-bottom:20px}.brand-mark{margin-bottom:22px}.app-heading{text-align:left}.app-heading h1{font-size:clamp(2rem,9vw,2.65rem)}.app-subtitle{margin:9px 0 0;font-size:.88rem}.game-layout{padding:14px 0 18px}.board-panel{padding:12px 10px 14px;border-radius:var(--radius-lg)}.panel-heading{align-items:flex-start;margin:0 3px 12px}.panel-heading h2{font-size:1.35rem}.match-badge{padding:7px 9px;font-size:.65rem}.companion-panel{padding:18px}.app-footer{flex-wrap:wrap;font-size:.62rem}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
