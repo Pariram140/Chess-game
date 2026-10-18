@@ -79,8 +79,15 @@ function Board({ controllerFactory = createDefaultController }) {
 
   return (
     <section className="chess-game" aria-label="Chess game board">
-      <div className="game-status" role="status" aria-live="polite">{describeStatus(gameState)}</div>
-      <button type="button" onClick={resetGame}>Reset game</button>
+      <div className={`game-status ${gameState.phase === GAME_PHASES.GAME_OVER ? 'is-terminal' : ''} ${gameState.phase === GAME_PHASES.CPU_ERROR ? 'has-error' : ''}`} role="status" aria-live="polite" aria-atomic="true">
+        <span className="status-indicator" aria-hidden="true" />
+        <span>{describeStatus(gameState)}</span>
+      </div>
+      <div className="game-actions" role="group" aria-label="Game actions">
+        <button type="button" className="primary-action" onClick={resetGame}>
+          <span aria-hidden="true">↻</span> New game
+        </button>
+      </div>
       {gameState.phase === GAME_PHASES.PROMOTION_PENDING && (
         <div className="promotion-picker" role="group" aria-label="Choose promotion piece">
           {gameState.pendingPromotion.choices.map((piece) => <button type="button" key={piece} onClick={() => choosePromotion(piece)} aria-label={`Promote to ${PROMOTION_LABELS[piece]}`}>{PROMOTION_LABELS[piece]}</button>)}
@@ -127,10 +134,27 @@ function Board({ controllerFactory = createDefaultController }) {
           </div>
         ))}
       </div>
-      <div className="move-history" aria-label="Move history">
-        <span className="move-history-label">Moves</span>
-        <span>{gameState.moveHistory.length ? gameState.moveHistory.join(' ') : 'No moves yet'}</span>
-      </div>
+      <section className="move-history-panel" aria-labelledby="move-history-heading">
+        <div className="move-history-heading">
+          <h3 id="move-history-heading">Move history</h3>
+          <span className="move-count">{gameState.moveHistory.length} {gameState.moveHistory.length === 1 ? 'ply' : 'plies'}</span>
+        </div>
+        {gameState.moveHistory.length ? (
+          <ol className="move-history" aria-label="Recorded moves">
+            {Array.from({ length: Math.ceil(gameState.moveHistory.length / 2) }, (_, index) => (
+              <li className="move-pair" key={index}>
+                <span className="move-number">{index + 1}.</span>
+                <span className="move-san">{gameState.moveHistory[index * 2]}</span>
+                {gameState.moveHistory[index * 2 + 1] && (
+                  <span className="move-san">{gameState.moveHistory[index * 2 + 1]}</span>
+                )}
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="empty-move-history">No moves yet. Your opening move starts the record.</p>
+        )}
+      </section>
     </section>
   );
 }
