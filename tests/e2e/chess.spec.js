@@ -13,7 +13,7 @@ test('renders all 64 squares and the initial position', async ({ page }) => {
   const renderedPieces = page.locator('.board .piece');
   await expect(renderedPieces).toHaveCount(32);
   await expect.poll(() => renderedPieces.locator('svg').count()).toBe(32);
-  await expect(page.locator('.move-history')).toContainText('No moves yet');
+  await expect(page.locator('.empty-move-history')).toContainText('No moves yet');
 });
 
 test('rejects an illegal pawn move without changing the board', async ({ page }) => {
