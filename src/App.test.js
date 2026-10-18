@@ -28,3 +28,19 @@ test('rejects illegal moves and accepts a legal pawn move', () => {
   expect(screen.getByRole('button', { name: /e4 white pawn, last move/i })).toBeInTheDocument();
   expect(screen.getByRole('status')).toHaveTextContent(/cpu's turn/i);
 });
+
+test('guide can be collapsed and reopened accessibly', () => {
+  render(<App />);
+
+  const toggle = screen.getByRole('button', { name: /hide guide/i });
+  expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  expect(screen.getByText(/select one of your white pieces/i)).toBeInTheDocument();
+
+  fireEvent.click(toggle);
+  expect(screen.getByRole('button', { name: /show guide/i })).toHaveAttribute('aria-expanded', 'false');
+  expect(screen.queryByText(/select one of your white pieces/i)).not.toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole('button', { name: /show guide/i }));
+  expect(screen.getByRole('button', { name: /hide guide/i })).toHaveAttribute('aria-expanded', 'true');
+  expect(screen.getByText(/select one of your white pieces/i)).toBeInTheDocument();
+});
