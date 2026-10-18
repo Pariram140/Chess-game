@@ -5,6 +5,8 @@ import {
   transitionGamePhase,
 } from './gameState';
 import { createChessDomain } from './chessDomain';
+import { requestCpuMove } from './cpuStrategy';
+import { createRandomCpuStrategy } from './randomCpuStrategy';
 
 function cloneSnapshot(snapshot) {
   return {
@@ -20,12 +22,16 @@ function cloneSnapshot(snapshot) {
 
 /**
  * Coordinates the lifecycle and keeps the chess domain private to the
- * controller. CPU execution is intentionally left to the CPU-strategy story.
+ * controller. CPU results are checked against legal moves for their position.
  */
-export function createGameController({ createDomain = createChessDomain } = {}) {
+export function createGameController({
+  createDomain = createChessDomain,
+  cpuStrategy = createRandomCpuStrategy(),
+} = {}) {
   let domain = createDomain(createInitialGameState().fen);
   let state = createInitialGameState();
   const listeners = new Set();
+  let generation = 0;
 
   function getState() {
     return {
@@ -52,6 +58,43 @@ export function createGameController({ createDomain = createChessDomain } = {}) 
     };
   }
 
+  async function runCpuTurn() {
+    if (state.phase !== GAME_PHASES.CPU_THINKING || !cpuStrategy) return;
+    const requestGeneration = generation;
+    try {
+      const move = await requestCpuMove(cpuStrategy, {
+        fen: domain.getFen(),
+        legalMoves: domain.getLegalMoves(),
+      });
+      if (requestGeneration !== generation || state.phase !== GAME_PHASES.CPU_THINKING) return;
+
+      const result = domain.makeMove(move);
+      if (!result.accepted) {
+        throw new Error(`CPU move rejected by domain: ${result.reason}`);
+      }
+
+      const terminal = result.snapshot.outcome.status !== 'ongoing';
+      state = {
+        ...state,
+        fen: result.snapshot.fen,
+        moveHistory: [...result.snapshot.moveHistory],
+        selectedSquare: null,
+        pendingPromotion: null,
+        cpuError: null,
+      };
+      setPhase(terminal ? GAME_EVENTS.GAME_FINISHED : GAME_EVENTS.CPU_MOVE_ACCEPTED, terminal);
+      publish();
+    } catch (error) {
+      if (requestGeneration !== generation || state.phase !== GAME_PHASES.CPU_THINKING) return;
+      state = {
+        ...state,
+        cpuError: error instanceof Error ? error.message : 'CPU strategy failed.',
+      };
+      setPhase(GAME_EVENTS.CPU_MOVE_FAILED);
+      publish();
+    }
+  }
+
   function applyAcceptedMove(result, event) {
     const terminal = result.snapshot.outcome.status !== 'ongoing';
     state = {
@@ -64,7 +107,12 @@ export function createGameController({ createDomain = createChessDomain } = {}) 
     };
     setPhase(terminal ? GAME_EVENTS.GAME_FINISHED : event, terminal);
     publish();
-    return { ...result, state: getState() };
+    const response = { ...result, state: getState() };
+
+    if (!terminal && state.phase === GAME_PHASES.CPU_THINKING && cpuStrategy) {
+      void runCpuTurn();
+    }
+    return response;
   }
 
   function handlePlayerMove(move) {
@@ -114,6 +162,7 @@ export function createGameController({ createDomain = createChessDomain } = {}) 
   }
 
   function reset() {
+    generation += 1;
     domain = createDomain(createInitialGameState().fen);
     state = createInitialGameState();
     publish();
