@@ -1,6 +1,7 @@
 import { Chess } from 'chess.js';
 
 const PROMOTION_PIECES = new Set(['q', 'r', 'b', 'n']);
+const PROMOTION_ORDER = ['q', 'r', 'b', 'n'];
 
 function getOutcome(game) {
   if (game.isCheckmate()) {
@@ -65,9 +66,9 @@ export function createChessDomain(initialFen) {
       return {
         accepted: false,
         reason: 'PROMOTION_REQUIRED',
-        choices: matchingMoves
-          .filter((move) => move.promotion)
-          .map((move) => move.promotion),
+        choices: PROMOTION_ORDER.filter((piece) =>
+          matchingMoves.some((move) => move.promotion === piece),
+        ),
       };
     }
 
