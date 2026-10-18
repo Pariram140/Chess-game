@@ -18,7 +18,7 @@ function Piece({ type }) {
   if (!name || !['white', 'black'].includes(color)) return null;
 
   return (
-    <span className={`piece ${type}`} aria-hidden="true">
+    <span className={`piece ${color} ${type}`} aria-hidden="true">
       <svg viewBox="0 0 92 92" focusable="false" aria-hidden="true">
         <g className="piece-silhouette">{SHAPES[pieceType]}</g>
       </svg>
