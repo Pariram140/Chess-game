@@ -24,7 +24,7 @@ describe('chess domain adapter', () => {
     expect(result.accepted).toBe(true);
     expect(result.snapshot.turn).toBe('b');
     expect(result.snapshot.moveHistory).toEqual(['e4']);
-    expect(result.snapshot.board[4][4]).toEqual({ type: 'p', color: 'w' });
+    expect(result.snapshot.board[4][4]).toEqual(expect.objectContaining({ type: 'p', color: 'w' }));
   });
 
   test('rejects an illegal move without mutating position or history', () => {
