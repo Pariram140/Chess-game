@@ -19,7 +19,7 @@ test('rejects illegal moves and accepts a legal pawn move', () => {
   expect(screen.getByRole('button', { name: 'e2 white pawn' })).toBeInTheDocument();
   expect(screen.getByRole('status')).toHaveTextContent(/user's turn/i);
 
-  fireEvent.click(screen.getByRole('button', { name: 'e2 white pawn' }));
+  // The illegal move is rejected and the selected pawn remains selected.
   fireEvent.click(screen.getByRole('button', { name: 'e4 empty square' }));
 
   expect(screen.getByRole('button', { name: 'e4 white pawn' })).toBeInTheDocument();
