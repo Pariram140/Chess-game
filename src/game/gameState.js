@@ -64,14 +64,11 @@ export function transitionGamePhase(currentPhase, event, { gameOver = false } = 
     return GAME_PHASES.PLAYER_TURN;
   }
 
-  if (gameOver && event !== GAME_EVENTS.GAME_FINISHED) {
-    return GAME_PHASES.GAME_OVER;
-  }
-
   const nextPhase = allowedTransitions[currentPhase][event];
   if (!nextPhase) {
     throw new Error(`Invalid game transition: ${currentPhase} + ${event}`);
   }
 
-  return nextPhase;
+  // A terminal domain position can override the destination, not transition validation.
+  return gameOver ? GAME_PHASES.GAME_OVER : nextPhase;
 }
