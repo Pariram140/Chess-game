@@ -10,6 +10,11 @@ test('renders all 64 squares and the initial position', async ({ page }) => {
   await expect(page.getByRole('group', { name: 'Chessboard' }).getByRole('button')).toHaveCount(64);
   await expect(page.getByRole('button', { name: 'e2 white pawn' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'e7 black pawn' })).toBeVisible();
+  const renderedPieces = page.locator('.board .piece');
+  await expect(renderedPieces).toHaveCount(32);
+  await expect.poll(() => renderedPieces.evaluateAll((pieces) =>
+    pieces.every((piece) => piece.textContent.trim().length > 0)
+  )).toBe(true);
   await expect(page.locator('.move-history')).toContainText('No moves yet');
 });
 
