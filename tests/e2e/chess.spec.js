@@ -23,7 +23,7 @@ test('rejects an illegal pawn move without changing the board', async ({ page })
   await expect(page.getByRole('button', { name: 'e2 white pawn' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'e5 empty square' })).toBeVisible();
   await expect(page.getByRole('status')).toHaveText("User's turn");
-  await expect(page.locator('.move-history')).toContainText('No moves yet');
+  await expect(page.locator('.empty-move-history')).toContainText('No moves yet');
 });
 
 test('plays a legal move and receives a legal CPU reply', async ({ page }) => {
@@ -59,5 +59,5 @@ test('shows terminal outcome and reset starts a new game', async ({ page }) => {
   await page.getByRole('button', { name: 'New game' }).click();
   await expect(page.getByRole('status')).toHaveText("User's turn");
   await expect(page.getByRole('button', { name: 'e2 white pawn' })).toBeVisible();
-  await expect(page.locator('.move-history')).toContainText('No moves yet');
+  await expect(page.locator('.empty-move-history')).toContainText('No moves yet');
 });
