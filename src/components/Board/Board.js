@@ -1,159 +1,114 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Chess } from 'chess.js';
+import Piece from '../Piece/Piece';
 import './Board.css';
-import Piece from '../Piece/Piece'; 
 
-const Board = () => {
-  const startingPosition = [
-    ['black-rook', 'black-knight', 'black-bishop', 'black-queen', 'black-king', 'black-bishop', 'black-knight', 'black-rook'],
-    ['black-pawn', 'black-pawn', 'black-pawn', 'black-pawn', 'black-pawn', 'black-pawn', 'black-pawn', 'black-pawn'],
-    [null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null],
-    ['white-pawn', 'white-pawn', 'white-pawn', 'white-pawn', 'white-pawn', 'white-pawn', 'white-pawn', 'white-pawn'],
-    ['white-rook', 'white-knight', 'white-bishop', 'white-queen', 'white-king', 'white-bishop', 'white-knight', 'white-rook']
-  ];
+const FILES = 'abcdefgh';
 
-  const [boardState, setBoardState] = useState(startingPosition);
+const describeStatus = (game) => {
+  if (game.isCheckmate()) {
+    return game.turn() === 'w' ? 'Checkmate — CPU wins' : 'Checkmate — you win';
+  }
+  if (game.isStalemate()) return 'Draw — stalemate';
+  if (game.isDraw()) return 'Draw — game over';
+  if (game.isCheck()) return game.turn() === 'w' ? "Your turn — you're in check" : "CPU's turn — check";
+  return game.turn() === 'w' ? "User's turn" : "CPU's turn";
+};
+
+function Board() {
+  const gameRef = useRef(new Chess());
+  const cpuTimerRef = useRef(null);
+  const [position, setPosition] = useState(() => gameRef.current.board());
   const [selectedSquare, setSelectedSquare] = useState(null);
-  const [selectedPiece, setSelectedPiece] = useState(null);
-  const [currentPlayer, setCurrentPlayer] = useState('white');
+  const [status, setStatus] = useState("User's turn");
+  const [moveHistory, setMoveHistory] = useState([]);
 
-  const handleSquareClick = (rowIndex, colIndex) => {
-    const pieceType = boardState[rowIndex][colIndex];
-    const currentPiece = { rowIndex, colIndex, pieceType };
+  useEffect(() => () => window.clearTimeout(cpuTimerRef.current), []);
 
+  const updateFromGame = () => {
+    const game = gameRef.current;
+    setPosition(game.board());
+    setMoveHistory(game.history());
+    setStatus(describeStatus(game));
+  };
 
-    // Check if it's the current player's turn
-    if (currentPlayer === 'white') {
-      if (selectedPiece && currentPiece && selectedPiece.pieceType == null && currentPiece.pieceType == null) {
-        // deselect if empty space was selected first and then second position is also empty space
-        setSelectedSquare(null);
-        setSelectedPiece(null);
+  const scheduleCpuMove = () => {
+    window.clearTimeout(cpuTimerRef.current);
+    setStatus("CPU's turn — thinking…");
+    cpuTimerRef.current = window.setTimeout(() => {
+      const game = gameRef.current;
+      if (game.isGameOver() || game.turn() !== 'b') return;
+      const legalMoves = game.moves();
+      if (legalMoves.length === 0) {
+        updateFromGame();
         return;
       }
-      // this case is to move piece to black if already a valid piece is selected
-      else if (selectedPiece ) {
-        // Deselect if the same square is clicked again
-        if (selectedSquare && selectedSquare.rowIndex === rowIndex && selectedSquare.colIndex === colIndex) {
-          setSelectedSquare(null);
-          setSelectedPiece(null);
-          return; // Exit the function
-        }
-        // Highlight the clicked square
-        setSelectedSquare({ rowIndex, colIndex });
+      game.move(legalMoves[Math.floor(Math.random() * legalMoves.length)]);
+      updateFromGame();
+    }, 350);
+  };
 
-        // Select the piece
-        setSelectedPiece(currentPiece);
-      
-      }
-      // Check if the clicked square contains the current player's piece
-      else if ( pieceType == null || pieceType.startsWith('white')) {
-        // Deselect if the same square is clicked again
-        if (selectedSquare && selectedSquare.rowIndex === rowIndex && selectedSquare.colIndex === colIndex) {
-          setSelectedSquare(null);
-          setSelectedPiece(null);
-          return; // Exit the function
-        }
+  const handleSquareClick = (square) => {
+    const game = gameRef.current;
+    if (game.isGameOver() || game.turn() !== 'w') return;
 
-        // Highlight the clicked square
-        setSelectedSquare({ rowIndex, colIndex });
-
-        // Select the piece
-        setSelectedPiece(currentPiece);
-      
-      } else {
-        // If the clicked square does not contain the current player's piece, return
-        return;
-      }
-    } else {
-      // If it's not the current player's turn, return
-      console.log("not user's turn")
+    const piece = game.get(square);
+    if (!selectedSquare) {
+      if (piece?.color === 'w') setSelectedSquare(square);
       return;
     }
-    console.log(currentPiece)
-    console.log(currentPlayer)
-    console.log(selectedPiece)
-    // If there's a selected piece and it's the current player's turn
-    if ( currentPlayer === 'white') {
-      console.log('move triggered',selectedPiece, currentPiece)
-      //do not move if valid piece is not selected yet
-      if(!selectedPiece){
-        return
-      }
-      // Move the selected piece to the clicked square if it's empty or contains the opponent's piece
-      if (pieceType == null  || !pieceType.startsWith('white')) {
-        movePiece(selectedPiece, currentPiece);
-      }
+
+    if (selectedSquare === square) {
+      setSelectedSquare(null);
+      return;
+    }
+
+    try {
+      game.move({ from: selectedSquare, to: square, promotion: 'q' });
+      setSelectedSquare(null);
+      updateFromGame();
+      if (!game.isGameOver() && game.turn() === 'b') scheduleCpuMove();
+    } catch {
+      // Invalid moves are rejected by chess.js; allow selecting another white piece.
+      if (piece?.color === 'w') setSelectedSquare(square);
     }
   };
 
-  const movePiece = (source, target) => {
-    // Get the piece type of the source position
-    const pieceType = boardState[source.rowIndex][source.colIndex];
-
-    // Create a copy of the current board state
-    const newBoardState = [...boardState];
-
-    // Update the board state to reflect the move
-    newBoardState[target.rowIndex][target.colIndex] = pieceType;
-    newBoardState[source.rowIndex][source.colIndex] = null;
-
-    // Log the move
-    console.log(`Move piece from (${source.rowIndex}, ${source.colIndex}) to (${target.rowIndex}, ${target.colIndex})`);
-
-    // Update the board state with the new position
-    setBoardState(newBoardState);
-
-    // Reset selectedPiece and selectedSquare
-    setSelectedPiece(null);
-    setSelectedSquare(null);
-
-    // Switch the turn to the CPU's turn
-    setCurrentPlayer('black');
-
-    // Perform CPU move (you can implement CPU logic here)
-    setTimeout(() => {
-      performCPUMove();
-    }, 1000); // Delay CPU move for 1 second (for demonstration)
-  };
-
-  const performCPUMove = () => {
-    // Implement CPU move logic here
-    console.log('CPU move performed');
-
-    // Switch the turn back to the user's turn
-    setCurrentPlayer('white');
-  };
+  const game = gameRef.current;
 
   return (
-    <div className="board">
-      <div className="turn-indicator">
-        {currentPlayer === 'white' ? 'User\'s Turn' : 'CPU\'s Turn'}
+    <section className="chess-game" aria-label="Chess game board">
+      <div className="game-status" role="status" aria-live="polite">{status}</div>
+      <div className="board" role="group" aria-label="Chessboard">
+        {position.map((row, rowIndex) => (
+          <div className="board-row" key={rowIndex}>
+            {row.map((piece, colIndex) => {
+              const square = `${FILES[colIndex]}${8 - rowIndex}`;
+              const isSelected = selectedSquare === square;
+              const color = piece ? (piece.color === 'w' ? 'white' : 'black') : null;
+              const pieceLabel = piece ? `${color} ${piece.type}` : 'empty square';
+              return (
+                <button
+                  type="button"
+                  key={square}
+                  className={`square ${(rowIndex + colIndex) % 2 === 0 ? 'dark' : 'light'} ${isSelected ? 'selected' : ''}`}
+                  aria-label={`${square} ${pieceLabel}`}
+                  aria-pressed={isSelected}
+                  onClick={() => handleSquareClick(square)}
+                >
+                  {piece && <Piece type={`${color}-${piece.type}`} />}
+                </button>
+              );
+            })}
+          </div>
+        ))}
       </div>
-      {boardState.map((row, rowIndex) => (
-        <div key={rowIndex} className="board-row">
-          {row.map((pieceType, colIndex) => {
-            const isSelected = selectedSquare && selectedSquare.rowIndex === rowIndex && selectedSquare.colIndex === colIndex;
-            return (
-              <div
-                key={`${rowIndex}-${colIndex}`}
-                className={`square ${colIndex % 2 === rowIndex % 2 ? 'white' : 'black'} ${isSelected ? 'selected' : ''}`}
-                onClick={() => handleSquareClick(rowIndex, colIndex)}
-              >
-                {pieceType && (
-                  <Piece
-                    type={pieceType}
-                    selected={selectedPiece && selectedPiece.rowIndex === rowIndex && selectedPiece.colIndex === colIndex}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
-      ))}
-    </div>
+      <div className="move-history" aria-label="Move history">
+        <span className="move-history-label">Moves</span>
+        <span>{moveHistory.length ? moveHistory.join(' ') : 'No moves yet'}</span>
+      </div>
+    </section>
   );
-};
+}
 
 export default Board;
