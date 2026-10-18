@@ -60,3 +60,18 @@ describe('Board lifecycle UI', () => {
     expect(screen.getByRole('button', { name: 'g7 white queen' })).toBeDisabled();
   });
 });
+
+
+test('reset clears selected-square state and restores the initial position', () => {
+  render(<Board controllerFactory={() => createGameController({ cpuStrategy: null })} />);
+
+  const pawn = screen.getByRole('button', { name: 'e2 white pawn' });
+  fireEvent.click(pawn);
+  expect(pawn).toHaveAttribute('aria-pressed', 'true');
+
+  fireEvent.click(screen.getByRole('button', { name: 'Reset game' }));
+
+  expect(screen.getByRole('button', { name: 'e2 white pawn' })).toHaveAttribute('aria-pressed', 'false');
+  expect(screen.getByRole('status')).toHaveTextContent(/user's turn/i);
+  expect(screen.getByLabelText('move history')).toHaveTextContent('No moves yet');
+});
