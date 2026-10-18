@@ -1,9 +1,14 @@
-/* App.css */
 .App {
+  min-height: 100vh;
+  padding: 1.5rem 1rem 2rem;
   text-align: center;
 }
 
-/* Board.css */
-.board {
-  /* Styling for the chessboard */
+.App h1 {
+  margin: 0;
+}
+
+.app-subtitle {
+  margin: 0.5rem 0 1rem;
+  color: #555;
 }
