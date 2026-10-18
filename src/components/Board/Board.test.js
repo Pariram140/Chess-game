@@ -73,5 +73,5 @@ test('reset clears selected-square state and restores the initial position', () 
 
   expect(screen.getByRole('button', { name: 'e2 white pawn' })).toHaveAttribute('aria-pressed', 'false');
   expect(screen.getByRole('status')).toHaveTextContent(/user's turn/i);
-  expect(screen.getByLabelText('move history')).toHaveTextContent('No moves yet');
+  expect(screen.getByLabelText('Move history')).toHaveTextContent('No moves yet');
 });
