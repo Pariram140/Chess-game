@@ -38,6 +38,24 @@ describe('chess domain adapter', () => {
     expect(domain.getSnapshot()).toEqual(before);
   });
 
+  test('requires an explicit promotion choice and applies the selected piece', () => {
+    const domain = createChessDomain('4k3/P7/8/8/8/8/8/4K3 w - - 0 1');
+    const before = domain.getSnapshot();
+
+    expect(domain.makeMove({ from: 'a7', to: 'a8' })).toEqual({
+      accepted: false,
+      reason: 'PROMOTION_REQUIRED',
+      choices: ['q', 'r', 'b', 'n'],
+    });
+    expect(domain.getSnapshot()).toEqual(before);
+
+    const result = domain.makeMove({ from: 'a7', to: 'a8', promotion: 'n' });
+    expect(result.accepted).toBe(true);
+    expect(result.snapshot.board[0][0]).toEqual(
+      expect.objectContaining({ type: 'n', color: 'w' }),
+    );
+  });
+
   test('reports checkmate and the winning side', () => {
     const domain = createChessDomain();
 
